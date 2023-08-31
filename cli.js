@@ -41,8 +41,8 @@ async function configure() {
     const page = await browser.newPage()
 
     await page.setViewport({
-      width: 1200,
-      height: 980,
+      width: 1280,
+      height: 1024,
       deviceScaleFactor: 1,
     })
 
@@ -62,7 +62,6 @@ async function configure() {
     const rows = await page.$$('.row')
 
     let reserveClicked = false
-    console.log('Reserving...')
     for (const row of rows) {
       // Find the title by class name.
       const titleElement = await row.$('.r-t')
@@ -72,31 +71,57 @@ async function configure() {
 
       // The day of week is the first <span> in the title element.
       const dayOfWeek = await titleElement.$eval('span', node => node.innerText)
-      if (dayOfWeek === 'Saturday' || dayOfWeek === 'Sunday') {
-        continue
-      }
-
-      const buttons = await row.$$('button')
-      for (const button of buttons) {
-        // Find the reserve button.
-        const buttonText = await button.evaluate(node => node.innerText)
-        if (!buttonText.toLowerCase().includes('reserve')) {
-          continue
-        }
+      if (dayOfWeek === 'Tuesday' || dayOfWeek === 'Thursday') {
+      // if (dayOfWeek === 'Wednesday') {
         
-        reserveClicked = true
-        await button.click()
-        await page.waitFor(500)
+        await page.screenshot({ path: `./scrapingbee_homepage.jpg` });
+        const buttons = await row.$$('button')
+        for (const button of buttons) {
+          // Find the details button.
+          const buttonText = await button.evaluate(node => node.innerText)
+          if (!buttonText.toLowerCase().includes('details')) {
+            continue
+          }
+
+          await page.screenshot({ path: `./scrapingbee_homepage1.jpg` });
+          await button.click()
+          await page.waitFor(3000)
+
+          // Select parking lot
+          await page.type('[type="text"]', "105")
+          await page.waitFor(1000)
+          await page.screenshot({ path: `./scrapingbee_homepage2.jpg` });
+          
+
+          const availableButtons = await page.$$('button')
+          for (const b of availableButtons) {
+            // Find the details button.
+            const rbuttonText = await b.evaluate(node => node.innerText)
+            if (!rbuttonText.toLowerCase().includes('reserve')) {
+              continue
+            }
+      
+            if (!reserveClicked) {
+              console.log('Reserving...')
+              await b.click()
+              await page.waitFor(7000)
+
+              reserveClicked = true
+              // Capture screenshot and save it in the current folder:
+              await page.screenshot({ path: `./scrapingbee_homepage3.jpg` });
+            }  
+          }        
+        }
       }
     }
-
-    console.log('Reserving complete!')
-
-    // If a reserve button was clicked, give it some time to catch up.
+  
     if (reserveClicked) {
-      await page.waitFor(5000)
+      console.log('Reserving complete for!')
     }
-
+    else {
+      console.log('Reservation FAILED for. May be the parcking space is already reserced. Please check!!!')
+    }
+    
     console.log('Logging out...')
     const [logOutButton] = (await page.$x('//a[contains(., "Logout")]'));
 
