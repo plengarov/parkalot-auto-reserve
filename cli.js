@@ -71,7 +71,7 @@ async function configure() {
 
       // The day of week is the first <span> in the title element.
       const dayOfWeek = await titleElement.$eval('span', node => node.innerText)
-      if (dayOfWeek === 'Tuesday' || dayOfWeek === 'Thursday') {
+      if (dayOfWeek === 'Monday' || dayOfWeek === 'Tuesday' || dayOfWeek === 'Thursday') {
       // if (dayOfWeek === 'Wednesday') {
         
         await page.screenshot({ path: `./scrapingbee_homepage.jpg` });
