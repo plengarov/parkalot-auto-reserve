@@ -59,7 +59,10 @@ async function configure() {
 
     await page.waitFor(3000)
 
-    const rows = await page.$$('.row')
+    let rows = await page.$$('.row')
+    
+    // Reverse the order of rows
+    rows = rows.reverse()
 
     let reserveClicked = false
     for (const row of rows) {
@@ -69,12 +72,17 @@ async function configure() {
         continue
       }
 
+      if (reserveClicked) {
+        break
+      }
+
       // The day of week is the first <span> in the title element.
       const dayOfWeek = await titleElement.$eval('span', node => node.innerText)
-      if (dayOfWeek === 'Monday' || dayOfWeek === 'Tuesday' || dayOfWeek === 'Thursday') {
-      // if (dayOfWeek === 'Wednesday') {
+      if (dayOfWeek === 'Monday' || dayOfWeek === 'Tuesday' || dayOfWeek === 'Wednesday' || dayOfWeek === 'Thursday') {
+      // if (dayOfWeek === 'Sunday') {
         
-        await page.screenshot({ path: `./scrapingbee_homepage.jpg` });
+        // await page.screenshot({ path: `./scrapingbee_homepage.jpg` });
+       
         const buttons = await row.$$('button')
         for (const button of buttons) {
           // Find the details button.
@@ -83,14 +91,16 @@ async function configure() {
             continue
           }
 
-          await page.screenshot({ path: `./scrapingbee_homepage1.jpg` });
+          // await page.screenshot({ path: `./scrapingbee_homepage1.jpg` });
+       
           await button.click()
           await page.waitFor(3000)
 
           // Select parking lot
-          await page.type('[type="text"]', "105")
+          await page.type('[type="text"]', "23")
           await page.waitFor(1000)
-          await page.screenshot({ path: `./scrapingbee_homepage2.jpg` });
+       
+          // await page.screenshot({ path: `./scrapingbee_homepage2.jpg` });
           
 
           const availableButtons = await page.$$('button')
